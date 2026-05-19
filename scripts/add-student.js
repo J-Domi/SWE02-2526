@@ -1,44 +1,36 @@
+const API_BASE_URL = 'http://localhost:5290/Students';
+
 function generateStudentId() {
-    const students = JSON.parse(localStorage.getItem('students')) || [];
-    const existingIds = students.map(s => s.id);
-
-    let newId;
-    do {
-        newId = Math.floor(Math.random() * 15000) + 1; // Random number between 1 and 15000
-    } while (existingIds.includes(newId));
-
-    return newId;
+    return Math.floor(Math.random() * 15000) + 1;
 }
 
-function saveStudentInfo(event){
+async function saveStudentInfo(event) {
+    event.preventDefault();
 
-    event.preventDefault(); // Prevent form submission
-
-    let $studentName = $('#studentName').val();
-    let studentID = generateStudentId(); // Auto-generate student ID
-    let $mathGrade = $('#mathGrade').val();
-    let $englishGrade = $('#englishGrade').val();
-    let $scienceGrade = $('#scienceGrade').val();
-
-    console.log('Student Name:', studentName);
-
-    let newStudent = {
-        name: $studentName,
-        id: studentID,
+    const newStudent = {
+        id: generateStudentId(),
+        name: $('#studentName').val(),
         grades: {
-            math: $mathGrade,
-            english: $englishGrade,
-            science: $scienceGrade
+            math: parseFloat($('#mathGrade').val()),
+            english: parseFloat($('#englishGrade').val()),
+            science: parseFloat($('#scienceGrade').val())
         }
+    };
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/AddNew`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newStudent)
+        });
+
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        console.log('New Student saved:', newStudent);
+        alert('Student information saved successfully!');
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Failed to save student:', error);
+        alert(`Failed to save student: ${error.message}`);
     }
-
-    let students = JSON.parse(localStorage.getItem('students')) || [];
-    students.push(newStudent);
-    localStorage.setItem('students', JSON.stringify(students));
-
-
-    console.log('New Student Object:', newStudent);
-
-    alert('Student information saved successfully!');
-    window.location.href = 'index.html';
 }

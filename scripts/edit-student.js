@@ -1,4 +1,6 @@
-function loadStudentData() {
+const API_BASE_URL = 'http://localhost:5290/Students';
+
+async function loadStudentData() {
     const studentId = parseInt(localStorage.getItem('studentToEditId'));
 
     if (!studentId) {
@@ -7,60 +9,65 @@ function loadStudentData() {
         return;
     }
 
-    const students = JSON.parse(localStorage.getItem('students')) || [];
-    const student = students.find(s => s.id === studentId);
+    try {
+        const response = await fetch(`${API_BASE_URL}/GetById?id=${studentId}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const student = await response.json();
 
-    console.log('Loaded student for editing:', student);
+        if (!student) {
+            alert('Student not found');
+            window.location.href = 'index.html';
+            return;
+        }
 
-    if (!student) {
-        alert('Student not found');
+        $('#studentName').val(student.name);
+        $('#studentId').val(student.id);
+        $('#mathGrade').val(student.grades?.math ?? '');
+        $('#englishGrade').val(student.grades?.english ?? '');
+        $('#scienceGrade').val(student.grades?.science ?? '');
+    } catch (error) {
+        console.error('Failed to load student:', error);
+        alert(`Failed to load student: ${error.message}`);
         window.location.href = 'index.html';
-        return;
     }
-
-    // Populate the form with student data
-    $('#studentName').val(student.name);
-    $('#studentId').val(student.id);
-    $('#mathGrade').val(student.grades.math);
-    $('#englishGrade').val(student.grades.english);
-    $('#scienceGrade').val(student.grades.science);
 }
 
-function updateStudent(event) {
+async function updateStudent(event) {
     event.preventDefault();
 
     const studentId = parseInt(localStorage.getItem('studentToEditId'));
-    const students = JSON.parse(localStorage.getItem('students')) || [];
-    const studentIndex = students.findIndex(s => s.id === studentId);
 
-    if (studentIndex === -1) {
-        alert('Student not found');
-        window.location.href = 'index.html';
-        return;
-    }
-
-    // Update student data
-    students[studentIndex] = {
+    const updatedStudent = {
+        id: studentId,
         name: $('#studentName').val(),
-        id: studentId, // Keep the same ID
         grades: {
-            math: $('#mathGrade').val(),
-            english: $('#englishGrade').val(),
-            science: $('#scienceGrade').val()
+            math: parseFloat($('#mathGrade').val()),
+            english: parseFloat($('#englishGrade').val()),
+            science: parseFloat($('#scienceGrade').val())
         }
     };
 
-    localStorage.setItem('students', JSON.stringify(students));
-    localStorage.removeItem('studentToEditId'); // Clean up
+    try {
+        const response = await fetch(`${API_BASE_URL}/Update`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedStudent)
+        });
 
-    alert('Student updated successfully!');
-    window.location.href = 'index.html';
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        localStorage.removeItem('studentToEditId');
+        alert('Student updated successfully!');
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Failed to update student:', error);
+        alert(`Failed to update student: ${error.message}`);
+    }
 }
 
-$(document).on('DOMContentLoaded', function() {
+$(document).on('DOMContentLoaded', function () {
     console.log('Edit Student page loaded');
     loadStudentData();
-    console.log('Student data loaded into form');
 
     const form = $('#editStudentForm');
     if (form) {

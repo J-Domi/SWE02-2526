@@ -1,4 +1,6 @@
-function loadStudentInfo() {
+const API_BASE_URL = 'http://localhost:5290/Students';
+
+async function loadStudentInfo() {
     const studentId = parseInt(localStorage.getItem('studentToDeleteId'));
 
     if (!studentId) {
@@ -7,35 +9,46 @@ function loadStudentInfo() {
         return;
     }
 
-    const students = JSON.parse(localStorage.getItem('students')) || [];
-    const student = students.find(s => s.id === studentId);
+    try {
+        const response = await fetch(`${API_BASE_URL}/GetById?id=${studentId}`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const student = await response.json();
 
-    if (!student) {
-        alert('Student not found');
+        if (!student) {
+            alert('Student not found');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        $('#infoName').text(student.name);
+        $('#infoId').text(student.id);
+    } catch (error) {
+        console.error('Failed to load student:', error);
+        alert(`Failed to load student: ${error.message}`);
         window.location.href = 'index.html';
-        return;
     }
-
-    // Display student info
-    $('#infoName').text(student.name);
-    $('#infoId').text(student.id);
 }
 
-function confirmDelete() {
+async function confirmDelete() {
     const studentId = parseInt(localStorage.getItem('studentToDeleteId'));
-    let students = JSON.parse(localStorage.getItem('students')) || [];
 
-    // Filter out the student to delete
-    students = students.filter(s => s.id !== studentId);
+    try {
+        const response = await fetch(`${API_BASE_URL}/Delete?id=${studentId}`, {
+            method: 'DELETE'
+        });
 
-    localStorage.setItem('students', JSON.stringify(students));
-    localStorage.removeItem('studentToDeleteId'); // Clean up
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-    alert('Student deleted successfully!');
-    window.location.href = 'index.html';
+        localStorage.removeItem('studentToDeleteId');
+        alert('Student deleted successfully!');
+        window.location.href = 'index.html';
+    } catch (error) {
+        console.error('Failed to delete student:', error);
+        alert(`Failed to delete student: ${error.message}`);
+    }
 }
 
-$(document).on('DOMContentLoaded', function() {
+$(document).on('DOMContentLoaded', function () {
     loadStudentInfo();
 
     const deleteBtn = $('#confirmDeleteBtn');
