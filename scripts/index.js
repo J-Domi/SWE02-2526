@@ -23,9 +23,9 @@ async function fetchStudents() {
         }
 
         students.forEach((student) => {
-            const math = parseFloat(student.grades?.math ?? 0);
-            const english = parseFloat(student.grades?.english ?? 0);
-            const science = parseFloat(student.grades?.science ?? 0);
+            const math = parseFloat(student?.math ?? 0);
+            const english = parseFloat(student?.english ?? 0);
+            const science = parseFloat(student?.science ?? 0);
             const average = ((math + english + science) / 3).toFixed(2);
             const status = average >= 60 ? 'Passing' : 'Failing';
             const statusClass = average >= 60 ? 'text-success' : 'text-danger';

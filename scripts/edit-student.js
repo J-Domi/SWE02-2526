@@ -22,9 +22,9 @@ async function loadStudentData() {
 
         $('#studentName').val(student.name);
         $('#studentId').val(student.id);
-        $('#mathGrade').val(student.grades?.math ?? '');
-        $('#englishGrade').val(student.grades?.english ?? '');
-        $('#scienceGrade').val(student.grades?.science ?? '');
+        $('#mathGrade').val(student.math ?? '');
+        $('#englishGrade').val(student.english ?? '');
+        $('#scienceGrade').val(student.science ?? '');
     } catch (error) {
         console.error('Failed to load student:', error);
         alert(`Failed to load student: ${error.message}`);
@@ -40,11 +40,9 @@ async function updateStudent(event) {
     const updatedStudent = {
         id: studentId,
         name: $('#studentName').val(),
-        grades: {
-            math: parseFloat($('#mathGrade').val()),
-            english: parseFloat($('#englishGrade').val()),
-            science: parseFloat($('#scienceGrade').val())
-        }
+        math: parseFloat($('#mathGrade').val()),
+        english: parseFloat($('#englishGrade').val()),
+        science: parseFloat($('#scienceGrade').val())
     };
 
     try {

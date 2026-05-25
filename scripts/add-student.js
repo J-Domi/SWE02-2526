@@ -10,11 +10,9 @@ async function saveStudentInfo(event) {
     const newStudent = {
         id: generateStudentId(),
         name: $('#studentName').val(),
-        grades: {
-            math: parseFloat($('#mathGrade').val()),
-            english: parseFloat($('#englishGrade').val()),
-            science: parseFloat($('#scienceGrade').val())
-        }
+        math: parseFloat($('#mathGrade').val()),
+        english: parseFloat($('#englishGrade').val()),
+        science: parseFloat($('#scienceGrade').val())
     };
 
     try {
